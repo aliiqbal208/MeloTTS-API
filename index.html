@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MeloTTS - Text to Speech</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    textarea { width: 100%; height: 100px; margin-bottom: 1rem; }
+    select, button, input { padding: 0.5rem; margin: 0.5rem 0; }
+    audio { display: block; margin-top: 1rem; width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>MeloTTS Text-to-Speech</h1>
+
+  <textarea id="textInput" placeholder="Enter text to synthesize..."></textarea><br>
+
+  <label for="speakerSelect">Speaker:</label>
+  <select id="speakerSelect">
+    <option value="EN-US">EN-US</option>
+    <option value="EN-AU">EN-AU</option>
+    <option value="JP">JP</option>
+    <!-- Add other speakers if needed -->
+  </select><br>
+
+  <label for="speedInput">Speed:</label>
+  <input id="speedInput" type="number" step="0.1" value="1.0" min="0.5" max="2.0"><br>
+
+  <button onclick="synthesize()">🔊 Synthesize</button>
+
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    async function synthesize() {
+      const text = document.getElementById("textInput").value;
+      const speaker = document.getElementById("speakerSelect").value;
+      const speed = parseFloat(document.getElementById("speedInput").value);
+
+      const res = await fetch("https://arthur-gcp-melotss-438508370689.us-central1.run.app/tts/base64", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text, speaker, speed })
+      });
+
+      if (!res.ok) {
+        alert("Error: " + res.statusText);
+        return;
+      }
+
+      const data = await res.json();
+      const audioBase64 = data.audio_content;
+      const audioBlob = base64ToBlob(audioBase64, "audio/mp3");
+      const audioUrl = URL.createObjectURL(audioBlob);
+      document.getElementById("audioPlayer").src = audioUrl;
+    }
+
+    function base64ToBlob(base64, mimeType) {
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+      for (let i = 0; i < byteCharacters.length; i += 512) {
+        const slice = byteCharacters.slice(i, i + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let j = 0; j < slice.length; j++) {
+          byteNumbers[j] = slice.charCodeAt(j);
+        }
+        byteArrays.push(new Uint8Array(byteNumbers));
+      }
+      return new Blob(byteArrays, { type: mimeType });
+    }
+  </script>
+</body>
+</html>
