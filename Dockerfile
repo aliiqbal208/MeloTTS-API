@@ -6,7 +6,7 @@ COPY . /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential libsndfile1 curl \
+    build-essential libsndfile1 curl ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
