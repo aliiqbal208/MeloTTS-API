@@ -1,5 +1,9 @@
 FROM python:3.9-slim
 
+LABEL maintainer="MeloTTS-API Team"
+LABEL description="MeloTTS-API: High-performance Text-to-Speech API service"
+LABEL version="1.0.0"
+
 WORKDIR /app
 
 COPY . /app
